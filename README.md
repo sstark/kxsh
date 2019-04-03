@@ -29,5 +29,4 @@ Example
     709 DPT14 |RFT N4.015 Absolute Feuchte g/| 0.000000
     710  DPT1 |RFT N4.015 Raumklima Behaglich| false
     711  DPT9 |OFT N4.015 Interner Temperatur| 22.4333
-    712  DPT8 |RFT N4.016 Interner Temperatur| 0
     713  DPT9 |RFT N4.016 Interner Feuchtemes| 0.000000
