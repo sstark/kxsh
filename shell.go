@@ -39,7 +39,7 @@ func main() {
 
 	datapoints := cg[fGroup]
 	if len(datapoints) == 0 {
-		log.Fatal("no datapoints in selected group")
+		log.Fatalf("no datapoints in group \"%s\"", fGroup)
 	}
 	err, ds := knx.GetDescriptionString(datapoints)
 	if err != nil {
