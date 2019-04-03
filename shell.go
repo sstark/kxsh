@@ -43,6 +43,6 @@ func main() {
 	}
 	for i, d := range dpv {
 		desc := ds[i].Description
-		fmt.Printf("%5d %5s \"%s\": %s\n", d.Datapoint, d.Format, desc, string(d.Value))
+		fmt.Printf("%5d %5s \"%-32s\": %s\n", d.Datapoint, d.Format, desc, string(d.Value))
 	}
 }
