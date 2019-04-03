@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
-
 	var cg map[string][]int
 	var err error
 
@@ -25,11 +23,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var fGroup string
+	var fGroup, fUrl string
 	flag.StringVar(&fGroup, "group", "default", "choose datapoint group")
+	flag.StringVar(&fUrl, "url", "", "specify URL of BAOS device")
 	flag.Parse()
 
-	knx := knxbaosip.NewClient("")
+	knx := knxbaosip.NewClient(fUrl)
 	err, si := knx.GetServerItem()
 	if err != nil {
 		log.Fatal(err)
