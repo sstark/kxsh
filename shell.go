@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/sstark/knxbaosip"
+	"io/ioutil"
 	"log"
 	"strings"
 )
@@ -11,6 +13,18 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
 	knx := knxbaosip.NewClient("")
 
+	var cg map[string][]int
+	var err error
+
+	b, err := ioutil.ReadFile("dps.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal(b, &cg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	err, si := knx.GetServerItem()
 	if err != nil {
 		log.Fatal(err)
@@ -18,8 +32,7 @@ func main() {
 	sn := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(si.SerialNumber)), "."), "[]")
 	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
 
-	datapoints := []int{102, 700, 701, 711, 712, 720, 721, 722}
-
+	datapoints := cg["default"]
 	err, ds := knx.GetDescriptionString(datapoints)
 	if err != nil {
 		log.Fatal(err)
