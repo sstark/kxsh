@@ -14,7 +14,13 @@ func main() {
 	var cg map[string][]int
 	var err error
 
-	b, err := ioutil.ReadFile("dps.json")
+	var fGroup, fUrl, fDps string
+	flag.StringVar(&fGroup, "group", "default", "choose datapoint group")
+	flag.StringVar(&fUrl, "url", "", "specify URL of BAOS device")
+	flag.StringVar(&fDps, "dps", "dps.json", "datapoint file")
+	flag.Parse()
+
+	b, err := ioutil.ReadFile(fDps)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -22,11 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	var fGroup, fUrl string
-	flag.StringVar(&fGroup, "group", "default", "choose datapoint group")
-	flag.StringVar(&fUrl, "url", "", "specify URL of BAOS device")
-	flag.Parse()
 
 	knx := knxbaosip.NewClient(fUrl)
 	err, si := knx.GetServerItem()
