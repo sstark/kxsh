@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/sstark/knxbaosip"
 	"io/ioutil"
@@ -11,7 +12,6 @@ import (
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
-	knx := knxbaosip.NewClient("")
 
 	var cg map[string][]int
 	var err error
@@ -25,6 +25,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var fGroup string
+	flag.StringVar(&fGroup, "group", "default", "choose datapoint group")
+	flag.Parse()
+
+	knx := knxbaosip.NewClient("")
 	err, si := knx.GetServerItem()
 	if err != nil {
 		log.Fatal(err)
@@ -32,7 +37,7 @@ func main() {
 	sn := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(si.SerialNumber)), "."), "[]")
 	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
 
-	datapoints := cg["default"]
+	datapoints := cg[fGroup]
 	err, ds := knx.GetDescriptionString(datapoints)
 	if err != nil {
 		log.Fatal(err)
