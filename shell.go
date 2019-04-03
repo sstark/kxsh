@@ -13,6 +13,11 @@ import (
 
 type GroupMap map[string][]int
 
+// JoinInts returns a string with the int elements of l joined together using c
+func JoinInts(l []int, c string) string {
+	return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(l)), c), "[]")
+}
+
 func listGroups(groups GroupMap) {
 	var ell string
 	for k, v := range groups {
@@ -23,7 +28,7 @@ func listGroups(groups GroupMap) {
 		} else {
 			ell = ""
 		}
-		l := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v[:ml])), " "), "[]")
+		l := JoinInts(v[:ml], " ")
 		fmt.Printf("%12s: %s%s\n", k, l, ell)
 	}
 }
@@ -59,7 +64,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sn := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(si.SerialNumber)), "."), "[]")
+	sn := JoinInts(si.SerialNumber, ".")
 	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
 
 	datapoints := cg[fGroup]
