@@ -38,6 +38,9 @@ func main() {
 	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
 
 	datapoints := cg[fGroup]
+	if len(datapoints) == 0 {
+		log.Fatal("no datapoints in selected group")
+	}
 	err, ds := knx.GetDescriptionString(datapoints)
 	if err != nil {
 		log.Fatal(err)
