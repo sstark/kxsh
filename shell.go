@@ -81,12 +81,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	sn := JoinInts(si.SerialNumber, ".")
+	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
+
 	if fInteractive {
 		prompt(knx, cg)
 	}
-
-	sn := JoinInts(si.SerialNumber, ".")
-	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
 
 	datapoints := cg[fGroup]
 	if len(datapoints) == 0 {
