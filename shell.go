@@ -33,44 +33,7 @@ func listGroups(groups GroupMap) {
 	}
 }
 
-func main() {
-	var cg GroupMap
-	var err error
-
-	var fGroup, fUrl, fDps string
-	var fLsGroups bool
-	flag.StringVar(&fGroup, "group", "default", "choose datapoint group")
-	flag.StringVar(&fUrl, "url", "", "specify URL of BAOS device")
-	flag.StringVar(&fDps, "dps", "dps.json", "datapoint file")
-	flag.BoolVar(&fLsGroups, "lsgroups", false, "show available groups")
-	flag.Parse()
-
-	b, err := ioutil.ReadFile(fDps)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = json.Unmarshal(b, &cg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if fLsGroups {
-		listGroups(cg)
-		os.Exit(0)
-	}
-
-	knx := knxbaosip.NewClient(fUrl)
-	err, si := knx.GetServerItem()
-	if err != nil {
-		log.Fatal(err)
-	}
-	sn := JoinInts(si.SerialNumber, ".")
-	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
-
-	datapoints := cg[fGroup]
-	if len(datapoints) == 0 {
-		log.Fatalf("no datapoints in group \"%s\"", fGroup)
-	}
+func readDatapoints(knx *knxbaosip.Client, datapoints []int) {
 	err, ds := knx.GetDescriptionString(datapoints)
 	if err != nil {
 		log.Fatal(err)
@@ -83,4 +46,52 @@ func main() {
 		desc := ds[i].Description
 		fmt.Printf("%5d %5s |%-30s| %s\n", d.Datapoint, d.Format, desc, string(d.Value))
 	}
+}
+
+func main() {
+	var cg GroupMap
+	var err error
+
+	var fGroup, fUrl, fDps string
+	var fList, fInteractive bool
+	flag.StringVar(&fGroup, "group", "default", "choose datapoint group")
+	flag.StringVar(&fUrl, "url", "", "specify URL of BAOS device")
+	flag.StringVar(&fDps, "dps", "dps.json", "datapoint file")
+	flag.BoolVar(&fList, "list", false, "show available groups")
+	flag.BoolVar(&fInteractive, "i", false, "interactive mode")
+	flag.Parse()
+
+	b, err := ioutil.ReadFile(fDps)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal(b, &cg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if fList {
+		listGroups(cg)
+		os.Exit(0)
+	}
+
+	knx := knxbaosip.NewClient(fUrl)
+	err, si := knx.GetServerItem()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if fInteractive {
+		prompt(knx, cg)
+	}
+
+	sn := JoinInts(si.SerialNumber, ".")
+	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
+
+	datapoints := cg[fGroup]
+	if len(datapoints) == 0 {
+		log.Fatalf("no datapoints in group \"%s\"", fGroup)
+	}
+
+	readDatapoints(knx, datapoints)
 }
