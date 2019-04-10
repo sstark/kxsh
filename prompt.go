@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/peterh/liner"
 	"github.com/sstark/knxbaosip"
@@ -53,6 +54,36 @@ func complete(l interface{}, word string) (c []string) {
 		}
 	}
 	return
+}
+
+func writeDatapoint(knx *knxbaosip.Client, words []string) error {
+	if len(words) != 3 {
+		return errors.New("wrong number of arguments")
+	}
+	dp, err := strconv.ParseInt(words[1], 0, 32)
+	if err != nil {
+		return fmt.Errorf("Syntax error in datapoint number: unexpected value \"%s\" (%s)", words[1], err)
+	}
+	err, dpd := knx.GetDatapointDescription([]int{int(dp)})
+	if err != nil {
+		return err
+	}
+	var setErr error
+	var res knxbaosip.JsonResult
+	switch dpd[0].DatapointType {
+	case knxbaosip.DPT1:
+		setErr, res = knx.SetDatapointValue(int(dp), dpd[0].DatapointType, words[2])
+	case knxbaosip.DPT5:
+		val, err := strconv.ParseInt(words[2], 0, 32)
+		if err != nil {
+			return fmt.Errorf("Syntax error: unexpected value \"%s\": (%s)", words[2], err)
+		}
+		setErr, res = knx.SetDatapointValue(int(dp), dpd[0].DatapointType, int(val))
+	}
+	if setErr != nil {
+		return fmt.Errorf("%s: %s", setErr, res)
+	}
+	return nil
 }
 
 func prompt(knx *knxbaosip.Client, groups GroupMap) {
@@ -127,35 +158,10 @@ func prompt(knx *knxbaosip.Client, groups GroupMap) {
 				readDatapoints(knx, dps)
 				line.AppendHistory(name)
 			case "write":
-				if len(words) != 3 {
-					log.Printf("wrong arguments")
-					break
-				}
-				dp, err := strconv.ParseInt(words[1], 0, 32)
+				err := writeDatapoint(knx, words)
 				if err != nil {
 					fmt.Println(err)
 					break
-				}
-				err, dpd := knx.GetDatapointDescription([]int{int(dp)})
-				if err != nil {
-					fmt.Println(err)
-					break
-				}
-				var setErr error
-				var res knxbaosip.JsonResult
-				switch dpd[0].DatapointType {
-				case knxbaosip.DPT1:
-					setErr, res = knx.SetDatapointValue(int(dp), dpd[0].DatapointType, words[2])
-				case knxbaosip.DPT5:
-					val, err := strconv.ParseInt(words[2], 0, 32)
-					if err != nil {
-						fmt.Println(err, val)
-						break
-					}
-					setErr, res = knx.SetDatapointValue(int(dp), dpd[0].DatapointType, int(val))
-				}
-				if setErr != nil {
-					fmt.Println(setErr, res)
 				}
 				line.AppendHistory(name)
 			default:
