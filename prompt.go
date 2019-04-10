@@ -126,6 +126,38 @@ func prompt(knx *knxbaosip.Client, groups GroupMap) {
 				}
 				readDatapoints(knx, dps)
 				line.AppendHistory(name)
+			case "write":
+				if len(words) != 3 {
+					log.Printf("wrong arguments")
+					break
+				}
+				dp, err := strconv.ParseInt(words[1], 0, 32)
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+				err, dpd := knx.GetDatapointDescription([]int{int(dp)})
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+				var setErr error
+				var res knxbaosip.JsonResult
+				switch dpd[0].DatapointType {
+				case knxbaosip.DPT1:
+					setErr, res = knx.SetDatapointValue(int(dp), dpd[0].DatapointType, words[2])
+				case knxbaosip.DPT5:
+					val, err := strconv.ParseInt(words[2], 0, 32)
+					if err != nil {
+						fmt.Println(err, val)
+						break
+					}
+					setErr, res = knx.SetDatapointValue(int(dp), dpd[0].DatapointType, int(val))
+				}
+				if setErr != nil {
+					fmt.Println(setErr, res)
+				}
+				line.AppendHistory(name)
 			default:
 				log.Println("command not found")
 			}
