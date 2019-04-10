@@ -109,7 +109,7 @@ func prompt(knx *knxbaosip.Client, groups GroupMap) {
 			switch words[0] {
 			case "group":
 				c = complete(groupList(groups), words[1])
-			case "read":
+			case "read", "write":
 				c = complete(groups[selectedGroup], words[1])
 			}
 		default:
