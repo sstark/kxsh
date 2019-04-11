@@ -146,6 +146,10 @@ func prompt(knx *knxbaosip.Client, groups GroupMap) {
 				line.AppendHistory(name)
 			case "read":
 				var dps []int
+				if selectedGroup == "" {
+					log.Printf("no group selected")
+					break
+				}
 				dps = groups[selectedGroup]
 				if len(words) > 1 && words[1] != "" {
 					val, convErr := strconv.ParseInt(words[1], 0, 32)
