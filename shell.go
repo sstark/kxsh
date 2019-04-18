@@ -88,7 +88,12 @@ func main() {
 	fmt.Printf("%s fw:%d sn:%v\n", knx.Url, si.FirmwareVersion, sn)
 
 	if fInteractive {
-		prompt(knx, cg)
+		err = prompt(knx, cg)
+		if err == nil {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
 	}
 
 	datapoints := cg[fGroup]

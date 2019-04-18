@@ -7,7 +7,6 @@ import (
 	"github.com/sstark/knxbaosip"
 	"io"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -87,7 +86,7 @@ func writeDatapoint(knx *knxbaosip.Client, words []string) error {
 	return nil
 }
 
-func prompt(knx *knxbaosip.Client, groups GroupMap) {
+func prompt(knx *knxbaosip.Client, groups GroupMap) error {
 	// word completer for liner
 	var wc = func(line string, pos int) (head string, c []string, tail string) {
 		var wordPos int
@@ -130,8 +129,7 @@ func prompt(knx *knxbaosip.Client, groups GroupMap) {
 			case "":
 				continue
 			case "quit":
-				os.Exit(0)
-				line.AppendHistory(name)
+				return nil
 			case "group":
 				if len(words) > 1 {
 					_, ok := groups[words[1]]
@@ -186,7 +184,7 @@ func prompt(knx *knxbaosip.Client, groups GroupMap) {
 			log.Print("Aborted")
 		} else if err == io.EOF {
 			log.Print("EOF")
-			os.Exit(0)
+			return nil
 		} else {
 			log.Print("Error reading line: ", err)
 		}
