@@ -19,6 +19,7 @@ const (
 var (
 	cmds          = []string{"quit", "read", "write", "group", "list"}
 	selectedGroup string
+	debug         bool = false
 )
 
 func makePrompt() (s string) {
@@ -168,6 +169,16 @@ func prompt(knx *knxbaosip.Client, groups GroupMap) {
 					break
 				}
 				line.AppendHistory(name)
+			case "debug":
+				if debug == false {
+					knx.SetDebugLevel(1)
+					debug = true
+					fmt.Println("debug on")
+				} else {
+					knx.SetDebugLevel(0)
+					debug = false
+					fmt.Println("debug off")
+				}
 			default:
 				log.Println("command not found")
 			}
