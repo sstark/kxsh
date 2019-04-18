@@ -38,19 +38,16 @@ func readDatapoints(knx *knxbaosip.Client, datapoints []int) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	dsm := make(map[int]string)
+	for _, n := range ds {
+		dsm[n.Datapoint] = n.Description
+	}
 	err, dpv := knx.GetDatapointValue(datapoints)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, d := range dpv {
-		var desc string
-		for _, n := range ds {
-			if d.Datapoint == n.Datapoint {
-				desc = n.Description
-				break
-			}
-		}
-		fmt.Printf("%5d %5s |%-30s| %s\n", d.Datapoint, d.Format, desc, string(d.Value))
+		fmt.Printf("%5d %5s |%-30s| %s\n", d.Datapoint, d.Format, dsm[d.Datapoint], string(d.Value))
 	}
 }
 
