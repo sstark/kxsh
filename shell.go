@@ -8,6 +8,7 @@ import (
 	"github.com/sstark/knxbaosip"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -97,6 +98,15 @@ func main() {
 	if fList {
 		listGroups(cg)
 		os.Exit(0)
+	}
+
+	if cf["user"] != "" && cf["pass"] != "" {
+		newUrl, err := url.Parse(fUrl)
+		if err != nil {
+			log.Fatalf("could not parse url: %v", err)
+		}
+		newUrl.User = url.UserPassword(cf["user"], cf["pass"])
+		fUrl = newUrl.String()
 	}
 
 	knx := knxbaosip.NewClient(fUrl)
