@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/OpenPeeDeeP/xdg"
 	"github.com/sstark/knxbaosip"
 	"io/ioutil"
 	"log"
@@ -11,7 +12,12 @@ import (
 	"strings"
 )
 
+const (
+	confFileName = "kxsh.conf"
+)
+
 type GroupMap map[string][]int
+type ConfigMap map[string]string
 
 // JoinInts returns a string with the int elements of l joined together using c
 func JoinInts(l []int, c string) string {
@@ -53,12 +59,27 @@ func readDatapoints(knx *knxbaosip.Client, datapoints []int) {
 
 func main() {
 	var cg GroupMap
+	var cf ConfigMap
 	var err error
+
+	conf := xdg.New("", "kxsh")
+	confFile := conf.QueryConfig(confFileName)
+	if confFile != "" {
+		fmt.Printf("using config from %s\n", confFile)
+		b, err := ioutil.ReadFile(confFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = json.Unmarshal(b, &cf)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	var fGroup, fUrl, fDps string
 	var fList, fInteractive bool
 	flag.StringVar(&fGroup, "group", "default", "choose datapoint group")
-	flag.StringVar(&fUrl, "url", "", "specify URL of BAOS device")
+	flag.StringVar(&fUrl, "url", cf["url"], "specify URL of BAOS device")
 	flag.StringVar(&fDps, "dps", "dps.json", "datapoint file")
 	flag.BoolVar(&fList, "list", false, "show available groups")
 	flag.BoolVar(&fInteractive, "i", false, "interactive mode")
@@ -81,6 +102,9 @@ func main() {
 	knx := knxbaosip.NewClient(fUrl)
 	err, si := knx.GetServerItem()
 	if err != nil {
+		if err == knxbaosip.AuthError {
+			log.Fatalf("%v: Please supply user and pass in the config file.", err)
+		}
 		log.Fatal(err)
 	}
 
