@@ -40,7 +40,7 @@ func listGroups(groups GroupMap) {
 	}
 }
 
-func readDatapoints(knx *knxbaosip.Client, datapoints []int) {
+func readDatapoints(knx *knxbaosip.Client, datapoints []int, tsv bool) {
 	err, ds := knx.GetDescriptionString(datapoints)
 	if err != nil {
 		log.Fatal(err)
@@ -54,7 +54,11 @@ func readDatapoints(knx *knxbaosip.Client, datapoints []int) {
 		log.Fatal(err)
 	}
 	for _, d := range dpv {
-		fmt.Printf("%5d %5s |%-30s| %s\n", d.Datapoint, d.Format, dsm[d.Datapoint], string(d.Value))
+		if tsv {
+			fmt.Printf("%5d\t%5s\t%-30s\t%s\n", d.Datapoint, d.Format, dsm[d.Datapoint], string(d.Value))
+		} else {
+			fmt.Printf("%5d %5s |%-30s| %s\n", d.Datapoint, d.Format, dsm[d.Datapoint], string(d.Value))
+		}
 	}
 }
 
@@ -78,12 +82,13 @@ func main() {
 	}
 
 	var fGroup, fUrl, fDps string
-	var fList, fInteractive bool
+	var fList, fInteractive, fTsv bool
 	flag.StringVar(&fGroup, "group", "default", "choose datapoint group")
 	flag.StringVar(&fUrl, "url", cf["url"], "specify URL of BAOS device")
 	flag.StringVar(&fDps, "dps", "dps.json", "datapoint file")
 	flag.BoolVar(&fList, "list", false, "show available groups")
 	flag.BoolVar(&fInteractive, "i", false, "interactive mode")
+	flag.BoolVar(&fTsv, "tsv", false, "tab separated output")
 	flag.Parse()
 
 	b, err := ioutil.ReadFile(fDps)
@@ -135,5 +140,5 @@ func main() {
 		log.Fatalf("no datapoints in group \"%s\"", fGroup)
 	}
 
-	readDatapoints(knx, datapoints)
+	readDatapoints(knx, datapoints, fTsv)
 }

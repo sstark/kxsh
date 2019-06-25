@@ -158,7 +158,7 @@ func prompt(knx *knxbaosip.Client, groups GroupMap) error {
 					}
 					dps = []int{int(val)}
 				}
-				readDatapoints(knx, dps)
+				readDatapoints(knx, dps, false)
 				line.AppendHistory(name)
 			case "write":
 				err := writeDatapoint(knx, words)
