@@ -55,7 +55,7 @@ func readDatapoints(knx *knxbaosip.Client, datapoints []int, tsv bool) {
 	}
 	for _, d := range dpv {
 		if tsv {
-			fmt.Printf("%5d\t%5s\t%-30s\t%s\n", d.Datapoint, d.Format, dsm[d.Datapoint], string(d.Value))
+			fmt.Printf("%d\t%s\t%s\t%s\n", d.Datapoint, d.Format, dsm[d.Datapoint], string(d.Value))
 		} else {
 			fmt.Printf("%5d %5s |%-30s| %s\n", d.Datapoint, d.Format, dsm[d.Datapoint], string(d.Value))
 		}
